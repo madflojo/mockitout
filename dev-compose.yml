@@ -1,0 +1,24 @@
+version: "3"
+services:
+  mockitout:
+    build: .
+    ports:
+      - "443:8443"
+      - "80:8080"
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: always
+    command: --debug 
+    environment:
+      - "ENABLE_TLS=false"
+      - "LISTEN_ADDR=0.0.0.0:8080"
+  tests:
+    build: .
+    working_dir: /go/src/github.com/madflojo/mockitout
+    entrypoint: go test -v -covermode=count -coverprofile=/tmp/coverage/coverage.out ./...
+    volumes:
+      - "./coverage:/tmp/coverage"
+
+volumes:
+  coverage:
