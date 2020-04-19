@@ -20,6 +20,11 @@ func (s *server) Health(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	w.WriteHeader(http.StatusOK)
 }
 
+// MockHandler is used to handle HTTP requests to the Mock Server.
+func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.WriteHeader(http.StatusOK)
+}
+
 // middleware is used to intercept incoming HTTP calls and apply general functions upon them. e.g. Metrics...
 func (s *server) middleware(n httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

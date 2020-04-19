@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/madflojo/mockitout/config"
+	"github.com/madflojo/mockitout/mocks"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -26,6 +27,9 @@ var cfg config.Config
 
 // logger is used across the app package for logging
 var log *logrus.Logger
+
+// mocked is the defined server mocks loaded from config.
+var mocked mocks.Mocks
 
 func Run(c config.Config) error {
 	// Apply config provided by command line application
@@ -66,6 +70,16 @@ func Run(c config.Config) error {
 	// Register HTTP Handlers
 	srv.httpRouter.GET("/health", srv.middleware(srv.Health))
 
+	// Start Registering Custom Mock Routes
+	mocked, err := mocks.FromFile(cfg.MocksFile)
+	if err != nil {
+		return err
+	}
+	for m, r := range mocked.Routes {
+		log.Infof("Registering mock %s with path %s", m, r.Path)
+		srv.httpRouter.GET(r.Path, srv.middleware(srv.MockHandler))
+	}
+
 	log.Infof("Starting Listener on %s", cfg.ListenAddr)
 	if cfg.EnableTLS {
 		err := srv.httpServer.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile)
@@ -76,7 +90,7 @@ func Run(c config.Config) error {
 			return err
 		}
 	}
-	err := srv.httpServer.ListenAndServe()
+	err = srv.httpServer.ListenAndServe()
 	if err != nil {
 		if err == http.ErrServerClosed {
 			return ErrShutdown

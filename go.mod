@@ -8,4 +8,5 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/madflojo/testcerts v0.0.0-20190712041726-f8fee566dcb6
 	github.com/sirupsen/logrus v1.5.0
+	gopkg.in/yaml.v2 v2.2.2
 )

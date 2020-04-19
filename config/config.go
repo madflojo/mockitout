@@ -27,6 +27,9 @@ type Config struct {
 
 	// KeyFile is used to specify the location of the TLS key file
 	KeyFile string `env:"KEY_FILE"`
+
+	// MocksFile is used to specify the full path to the mocks configuration file
+	MocksFile string `env:"ROUTES_FILE"`
 }
 
 // New will create a new Config instance with strong defaults.
