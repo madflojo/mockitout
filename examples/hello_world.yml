@@ -1,0 +1,9 @@
+routes:
+  hello:
+    path: "/hi"
+    response_headers:
+      "content-type": "application/json"
+    # Multi-line values can be created like this
+    body: | 
+      {"greeting": "Hello","name": "World"}
+    return_code: 200
