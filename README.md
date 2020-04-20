@@ -1,5 +1,9 @@
 # MockItOut
 
+[![Build 
+Status](https://travis-ci.org/madflojo/mockitout.svg)](
+https://travis-ci.org/madflojo/mockitout) [![Coverage Status](https://coveralls.io/repos/github/madflojo/mockitout/badge.svg?branch=master)](https://coveralls.io/github/madflojo/mockitout?branch=master)
+
 Test external services faster and better with an HTTP stub server.
 
 MockItOut is a simple to use HTTP stub server. With a small YAML configuration you can quickly create test end-points for HTTP APIs. Unlike other mock servers this project is language agnostic and easy to setup.
@@ -70,7 +74,7 @@ MockItOut is controlled via environment variables. The below is a list of all en
 * `LISTEN_ADDR` defines the server listener address and port. Default is `0.0.0.0:8443`
 * `CERT_FILE` defines the location of the TLS Certificate file.
 * `KEY_FILE` defines the location of the TLS Certificate Key file.
-* GEN_CERTS` can be `true` or `false`. This will enable the server to create temporary testing certs on boot. Default is `true`.
+* `GEN_CERTS` can be `true` or `false`. This will enable the server to create temporary testing certs on boot. Default is `true`.
 * `MOCKS_FILE` defines the location of the mocks configuration file.
 
 
