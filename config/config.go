@@ -22,7 +22,7 @@ type Config struct {
 	EnableTLS bool `env:"ENABLE_TLS" envDefault:"true"`
 
 	// ListenAddr specifies the HTTP Listener address used for this service.
-	ListenAddr string `env:"LISTEN_ADDR" envDefault:"0.0.0.0:443"`
+	ListenAddr string `env:"LISTEN_ADDR" envDefault:"0.0.0.0:8443"`
 
 	// CertFile specifies the location of the TLS certificate file. This is used only
 	// if TLS is Enabled.
@@ -44,7 +44,7 @@ type Config struct {
 // New will create a new Config instance with strong defaults.
 func New() Config {
 	c := Config{
-		ListenAddr: "0.0.0.0:443",
+		ListenAddr: "0.0.0.0:8443",
 		EnableTLS:  true,
 		Debug:      false,
 		GenCerts:   true,

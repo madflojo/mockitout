@@ -8,7 +8,7 @@ import (
 func TestConfigDefaults(t *testing.T) {
 	cfg := New()
 
-	if cfg.ListenAddr != "0.0.0.0:443" {
+	if cfg.ListenAddr != "0.0.0.0:8443" {
 		t.Errorf("Unexpected value for Listen Address - %s", cfg.ListenAddr)
 	}
 
