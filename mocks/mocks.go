@@ -35,7 +35,7 @@ func FromFile(filepath string) (Mocks, error) {
 	// Read file
 	c, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return m, fmt.Errorf("could not read Mocks file - %s", err)
+		return m, fmt.Errorf("could not read Mocks file at %s - %s", filepath, err)
 	}
 
 	// Parse the YAML

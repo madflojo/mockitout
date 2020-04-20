@@ -29,7 +29,7 @@ type Config struct {
 	KeyFile string `env:"KEY_FILE"`
 
 	// MocksFile is used to specify the full path to the mocks configuration file
-	MocksFile string `env:"ROUTES_FILE"`
+	MocksFile string `env:"MOCKS_FILE"`
 }
 
 // New will create a new Config instance with strong defaults.

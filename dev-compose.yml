@@ -13,7 +13,7 @@ services:
     environment:
       - "ENABLE_TLS=false"
       - "LISTEN_ADDR=0.0.0.0:8080"
-      - "MOCKS_FILE=./example/hello_world.yml"
+      - "MOCKS_FILE=/go/src/github.com/madflojo/mockitout/examples/hello_world.yml"
   tests:
     build: .
     working_dir: /go/src/github.com/madflojo/mockitout

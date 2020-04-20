@@ -32,6 +32,7 @@ var log *logrus.Logger
 var mocked mocks.Mocks
 
 func Run(c config.Config) error {
+	var err error
 	// Apply config provided by command line application
 	cfg = c
 
@@ -71,7 +72,7 @@ func Run(c config.Config) error {
 	srv.httpRouter.GET("/health", srv.middleware(srv.Health))
 
 	// Start Registering Custom Mock Routes
-	mocked, err := mocks.FromFile(cfg.MocksFile)
+	mocked, err = mocks.FromFile(cfg.MocksFile)
 	if err != nil {
 		return err
 	}
