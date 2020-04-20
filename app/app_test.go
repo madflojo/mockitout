@@ -34,6 +34,7 @@ func TestBadConfigs(t *testing.T) {
 		MocksFile:      "./somefile/hello_world.yml",
 	}
 
+	// Loop through bad configs, creating sub-tests as we go
 	for k, v := range cfgs {
 		t.Run("Testing "+k, func(t *testing.T) {
 			ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Duration(5)*time.Second))
@@ -72,9 +73,11 @@ func TestRunningServer(t *testing.T) {
 			t.Errorf("Run unexpectedly stopped - %s", err)
 		}
 	}()
+	// Clean up
+	defer Stop()
 
 	// Wait for app to start
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	t.Run("Check Health HTTP Handler", func(t *testing.T) {
 		r, err := http.Get("http://localhost:9000/health")
@@ -85,9 +88,6 @@ func TestRunningServer(t *testing.T) {
 			t.Errorf("Unexpected http status code when checking health - %d", r.StatusCode)
 		}
 	})
-
-	// Clean up
-	Stop()
 }
 
 func TestRunningTLSServer(t *testing.T) {
@@ -97,6 +97,8 @@ func TestRunningTLSServer(t *testing.T) {
 		t.Errorf("Failed to create certs - %s", err)
 		t.FailNow()
 	}
+	defer os.Remove("/tmp/cert")
+	defer os.Remove("/tmp/key")
 
 	fh, err := mocks.GenExampleFile()
 	if err != nil {
@@ -122,9 +124,11 @@ func TestRunningTLSServer(t *testing.T) {
 			t.Errorf("Run unexpectedly stopped - %s", err)
 		}
 	}()
+	// Clean up
+	defer Stop()
 
 	// Wait for app to start
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	t.Run("Check Health HTTP Handler", func(t *testing.T) {
 		r, err := http.Get("https://localhost:9000/health")
@@ -137,6 +141,46 @@ func TestRunningTLSServer(t *testing.T) {
 		}
 	})
 
+}
+
+func TestGenTLSServer(t *testing.T) {
+	fh, err := mocks.GenExampleFile()
+	if err != nil {
+		t.Fatalf("Could not generate example Mocks file - %s", err)
+	}
+	defer os.Remove(fh.Name())
+
+	// Disable Host Checking globally
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	// Start Server in goroutine
+	go func() {
+		err := Run(config.Config{
+			Debug:          true,
+			EnableTLS:      true,
+			GenCerts:       true,
+			ListenAddr:     "localhost:9000",
+			DisableLogging: true,
+			MocksFile:      fh.Name(),
+		})
+		if err != nil && err != ErrShutdown {
+			t.Errorf("Run unexpectedly stopped - %s", err)
+		}
+	}()
 	// Clean up
-	Stop()
+	defer Stop()
+
+	// Wait for app to start
+	time.Sleep(10 * time.Second)
+
+	t.Run("Check Health HTTP Handler", func(t *testing.T) {
+		r, err := http.Get("https://localhost:9000/health")
+		if err != nil {
+			t.Errorf("Unexpected error when requesting health status - %s", err)
+			t.FailNow()
+		}
+		if r.StatusCode != 200 {
+			t.Errorf("Unexpected http status code when checking health - %d", r.StatusCode)
+		}
+	})
 }

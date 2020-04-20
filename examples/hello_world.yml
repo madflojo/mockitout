@@ -3,7 +3,18 @@ routes:
     path: "/hi"
     response_headers:
       "content-type": "application/json"
+      "server": "MockItOut"
     # Multi-line values can be created like this
     body: | 
-      {"greeting": "Hello","name": "World"}
-    return_code: 200
+      {
+        "greeting": "Hello",
+        "name": "World"
+      }
+  deny:
+    path: "/no"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {"status": false}
+    return_code: 403

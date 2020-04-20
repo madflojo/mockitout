@@ -4,16 +4,9 @@ services:
     build: .
     ports:
       - "443:8443"
-      - "80:8080"
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: always
     command: --debug 
     environment:
-      - "ENABLE_TLS=false"
-      - "LISTEN_ADDR=0.0.0.0:8080"
-      - "MOCKS_FILE=/go/src/github.com/madflojo/mockitout/examples/hello_world.yml"
+      - "LISTEN_ADDR=0.0.0.0:8443"
   tests:
     build: .
     working_dir: /go/src/github.com/madflojo/mockitout

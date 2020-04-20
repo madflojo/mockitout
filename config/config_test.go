@@ -19,6 +19,10 @@ func TestConfigDefaults(t *testing.T) {
 	if cfg.Debug != false {
 		t.Errorf("Unexpected value for Debug - %t", cfg.Debug)
 	}
+
+	if cfg.GenCerts != true {
+		t.Errorf("Unexpected value for GenCerts - %t", cfg.GenCerts)
+	}
 }
 
 func TestConfigFromEnv(t *testing.T) {

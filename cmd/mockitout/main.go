@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// options is used to process command line arguments. These are minimal, in lieu of using 
+// environment variables to control the server.
 type options struct {
 	Debug bool `long:"debug" description:"Enable debug logging"`
 }
@@ -23,7 +25,7 @@ func main() {
 		log.Fatalf("Unable to parse command line options, shutting down - %s", err)
 	}
 
-	// Load Config from Environment
+	// Load Config from environment
 	env, err := config.NewFromEnv()
 	if err != nil {
 		log.Fatalf("Unable to load config shutting down - %s", err)
@@ -34,10 +36,10 @@ func main() {
 		env.Debug = opts.Debug
 	}
 
-	// Run Primary Application
+	// Run application
 	err = app.Run(env)
 	if err != nil || err != app.ErrShutdown {
 		log.Fatalf("MockItOut stopped abruptly - %s", err)
 	}
-	log.Printf("MockItOut shutdown gracefully - %s", err)
+	log.Infof("MockItOut shutdown gracefully - %s", err)
 }

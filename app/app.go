@@ -10,40 +10,42 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/madflojo/mockitout/config"
 	"github.com/madflojo/mockitout/mocks"
+	"github.com/madflojo/testcerts"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 )
 
-// Create some common errors returned by this app
+// Common errors returned by this app.
 var (
 	ErrShutdown = fmt.Errorf("Application shutdown gracefully")
 )
 
-// srv is the global reference for the HTTP Server
+// srv is the global reference for the HTTP Server.
 var srv *server
 
-// cfg is used across the app package to contain configuration
+// cfg is used across the app package to contain configuration.
 var cfg config.Config
 
-// logger is used across the app package for logging
+// log is used across the app package for logging.
 var log *logrus.Logger
 
 // mocked is the defined server mocks loaded from config.
 var mocked mocks.Mocks
 
+// Run starts the primary application. It handles starting background services,
+// populating package globals & structures, and clean up tasks.
 func Run(c config.Config) error {
 	var err error
-	// Apply config provided by command line application
+	// Apply config provided by main
 	cfg = c
 
 	// Initiate the logger
 	log = logrus.New()
-
 	if cfg.Debug {
 		log.Level = logrus.DebugLevel
 		log.Debug("Enabling Debug Logging")
 	}
-
 	if cfg.DisableLogging {
 		log.Level = logrus.FatalLevel
 	}
@@ -57,8 +59,21 @@ func Run(c config.Config) error {
 		Handler: srv.httpRouter,
 	}
 
-	// Configure the HTTP Server for TLS
+	// Setup TLS Configuration
 	if cfg.EnableTLS {
+		if cfg.GenCerts {
+			// Create Test Certs
+			cfg.CertFile = "/tmp/cert"
+			cfg.KeyFile = "/tmp/key"
+			log.Infof("Certificate Generation was enabled, creating new test certs at %s and %s", cfg.CertFile, cfg.KeyFile)
+			err := testcerts.GenerateCertsToFile(cfg.CertFile, cfg.KeyFile)
+			if err != nil {
+				return fmt.Errorf("Could not generate test certificates - %s", err)
+			}
+			defer os.Remove(cfg.CertFile)
+			defer os.Remove(cfg.KeyFile)
+		}
+
 		srv.httpServer.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 			CipherSuites: []uint16{
@@ -68,10 +83,10 @@ func Run(c config.Config) error {
 		}
 	}
 
-	// Register HTTP Handlers
+	// Register Health Check Handler
 	srv.httpRouter.GET("/health", srv.middleware(srv.Health))
 
-	// Start Registering Custom Mock Routes
+	// Start Registering Custom Mock HTTP Routes
 	mocked, err = mocks.FromFile(cfg.MocksFile)
 	if err != nil {
 		return err
@@ -81,6 +96,7 @@ func Run(c config.Config) error {
 		srv.httpRouter.GET(r.Path, srv.middleware(srv.MockHandler))
 	}
 
+	// Start HTTP Listener
 	log.Infof("Starting Listener on %s", cfg.ListenAddr)
 	if cfg.EnableTLS {
 		err := srv.httpServer.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile)
@@ -102,7 +118,7 @@ func Run(c config.Config) error {
 	return nil
 }
 
-// Adding a Stop function for graceful shutdown and testing
+// Stop is used to gracefully shutdown the server.
 func Stop() {
 	defer srv.httpServer.Shutdown(context.Background())
 }
