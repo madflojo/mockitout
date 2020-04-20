@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// options is used to process command line arguments. These are minimal, in lieu of using 
+// options is used to process command line arguments. These are minimal, in lieu of using
 // environment variables to control the server.
 type options struct {
 	Debug bool `long:"debug" description:"Enable debug logging"`
