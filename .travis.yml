@@ -3,10 +3,6 @@ go:
   - 1.14.1
 os:
   - linux
-env:
-  - "PATH=/home/travis/gopath/bin:$PATH"
-  - "ENABLE_TLS=false"
-  - "LISTEN_ADDR=8080"
 before_script:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
