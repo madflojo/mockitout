@@ -12,6 +12,5 @@ script:
   - go vet -v ./...
   - go test -v -covermode=count -coverprofile=coverage.out ./...
   - docker-compose -f dev-compose.yml up --build -d mockitout
-  - curl -k https://localhost:443/hi | python -mjson.tool
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
