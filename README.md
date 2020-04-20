@@ -27,7 +27,7 @@ $ docker run -p 443:8443 madflojo/mockitout:latest
 This will start the service with our [example mock file](examples/hello_world.yml). To test it you can use `curl`.
 
 ```sh
-curl -vk https://localhost:8443/hi
+curl -vk https://localhost:443/hi
 ```
 ### Specifying your own mocks file
 
