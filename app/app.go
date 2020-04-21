@@ -58,6 +58,7 @@ func Run(c config.Config) error {
 		Addr:    cfg.ListenAddr,
 		Handler: srv.httpRouter,
 	}
+	srv.httpRouter.SaveMatchedRoutePath = true
 
 	// Setup TLS Configuration
 	if cfg.EnableTLS {
@@ -94,6 +95,9 @@ func Run(c config.Config) error {
 	for m, r := range mocked.Routes {
 		log.Infof("Registering mock %s with path %s", m, r.Path)
 		srv.httpRouter.GET(r.Path, srv.middleware(srv.MockHandler))
+		srv.httpRouter.POST(r.Path, srv.middleware(srv.MockHandler))
+		srv.httpRouter.PUT(r.Path, srv.middleware(srv.MockHandler))
+		srv.httpRouter.DELETE(r.Path, srv.middleware(srv.MockHandler))
 	}
 
 	// Start HTTP Listener
