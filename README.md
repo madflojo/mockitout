@@ -2,7 +2,7 @@
 
 [![Build 
 Status](https://travis-ci.org/madflojo/mockitout.svg)](
-https://travis-ci.org/madflojo/mockitout) [![Coverage Status](https://coveralls.io/repos/github/madflojo/mockitout/badge.svg?branch=master)](https://coveralls.io/github/madflojo/mockitout?branch=master)
+https://travis-ci.org/madflojo/mockitout) [![Coverage Status](https://coveralls.io/repos/github/madflojo/mockitout/badge.svg?branch=master)](https://coveralls.io/github/madflojo/mockitout?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/madflojo/mockitout)](https://goreportcard.com/report/github.com/madflojo/mockitout) ![Docker Pulls](https://img.shields.io/docker/pulls/madflojo/mockitout)
 
 Test external services faster and better with an HTTP stub server.
 
