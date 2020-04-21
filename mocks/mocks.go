@@ -26,6 +26,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"regexp"
 )
 
 // Mocks defines the main mocks file structure.
@@ -78,6 +79,12 @@ func FromFile(filepath string) (Mocks, error) {
 	// Setup helper values
 	m.Paths = make(map[string]string)
 	for k, v := range m.Routes {
+		match, err := regexp.MatchString(`\*$`, v.Path)
+		if err == nil && match {
+			v.Path = v.Path + "wildcard"
+			m.Routes[k] = v
+		}
+
 		// Create lookup map
 		m.Paths[v.Path] = k
 	}
@@ -109,6 +116,24 @@ routes:
     body: |
       {"status": false}
     return_code: 403
+  names:
+    path: "/names/*"
+    response_headers:
+      "content-type": "application/json"
+      "server": "WalkItOut"
+    return_code: 200
+    body: |
+      {
+        "1": {
+          "name": "DJ Unk"
+        },
+        "2": {
+          "name": "Andre 3000"
+        },
+        "3": {
+          "name": "Jim Jones"
+        }
+      }
 `)
 
 	fh, err := ioutil.TempFile("", "mocks_example")

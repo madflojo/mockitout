@@ -78,6 +78,25 @@ func TestMockServer(t *testing.T) {
 		}
 	})
 
+	for _, v := range []string{"Unk", "Andre", "Jim"} {
+		t.Run("Check WildCard Mock URL with "+v, func(t *testing.T) {
+			r, err := http.Get("http://localhost:9000/names/" + v)
+			if err != nil {
+				t.Errorf("Unexpected error when requesting mock URL - %s", err)
+			}
+
+			// Verify expected return code
+			if r.StatusCode != 200 {
+				t.Errorf("Unexpected http status code - %d", r.StatusCode)
+			}
+
+			// Verify expected headers
+			if r.Header.Get("Server") != "WalkItOut" {
+				t.Errorf("Could not find expected Header Server - %+v", r.Header)
+			}
+		})
+	}
+
 	t.Run("Check Deny Mock URL", func(t *testing.T) {
 		r, err := http.Get("http://localhost:9000/no")
 		if err != nil {

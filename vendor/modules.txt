@@ -4,7 +4,7 @@ github.com/caarlos0/env/v6
 # github.com/jessevdk/go-flags v1.4.0
 ## explicit
 github.com/jessevdk/go-flags
-# github.com/julienschmidt/httprouter v1.3.0
+# github.com/julienschmidt/httprouter v1.3.1-0.20200114094804-8c9f31f047a3
 ## explicit
 github.com/julienschmidt/httprouter
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1

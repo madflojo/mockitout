@@ -27,7 +27,7 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	var route mocks.Route
 	var path string
 	var ok bool
-	if path, ok = mocked.Paths[r.RequestURI]; !ok {
+	if path, ok = mocked.Paths[ps.MatchedRoutePath()]; !ok {
 		log.Errorf("Request URI %s not found within Mocks file - available paths %+v", r.RequestURI, mocked)
 		w.WriteHeader(http.StatusNotFound)
 		return

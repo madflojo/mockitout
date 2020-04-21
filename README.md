@@ -62,6 +62,24 @@ routes:
     body: |
       {"status": false}
     return_code: 403
+  names:
+    path: "/names/*"
+    response_headers:
+      "content-type": "application/json"
+      "server": "WalkItOut"
+    return_code: 200
+    body: |
+      {
+        "1": {
+          "name": "DJ Unk"
+        },
+        "2": {
+          "name": "Andre 3000"
+        },
+        "3": {
+          "name": "Jim Jones"
+        }
+      }
 ```
 
 ## Configuring with Environment Variables
