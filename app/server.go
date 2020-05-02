@@ -5,6 +5,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/madflojo/mockitout/mocks"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -64,12 +65,24 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 // them. e.g. Metrics, Logging...
 func (s *server) middleware(n httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		// Log the basics
 		log.WithFields(logrus.Fields{
-			"method":        r.Method,
-			"remote-addr":   r.RemoteAddr,
-			"http-protocol": r.Proto,
-			"headers":       r.Header,
+			"method":         r.Method,
+			"remote-addr":    r.RemoteAddr,
+			"http-protocol":  r.Proto,
+			"headers":        r.Header,
+			"content-length": r.ContentLength,
 		}).Debugf("HTTP Request to %s", r.URL)
+
+		if r.ContentLength > 0 {
+			// Dump payload into logs for visibility
+			b, err := ioutil.ReadAll(r.Body)
+			if err == nil {
+				log.Debugf("Dumping Payload for request to %s: %s", r.URL, b)
+			}
+		}
+
+		// Call registered handler
 		n(w, r, ps)
 	}
 }
