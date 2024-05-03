@@ -7,9 +7,6 @@ import (
 )
 
 func TestReplaceVariables(t *testing.T) {
-	r := createTestRequestContext()
-	t.Setenv("testenv", "envvalue")
-
 	testMatrix := map[string]struct {
 		inputData   string
 		expectError bool
@@ -55,6 +52,11 @@ func TestReplaceVariables(t *testing.T) {
 			expectError: false,
 			expectValue: "Test Environment Data: {{environment.badenv}}",
 		},
+		"Valid Double Variable": {
+			inputData:   "Test Double Variable Data: {{header.testheader}} {{query.testquery}}",
+			expectError: false,
+			expectValue: "Test Double Variable Data: headervalue queryvalue",
+		},
 		"Invalid Random": {
 			inputData:   "Test Random Data: {{$badRandom}}",
 			expectError: false,
@@ -89,6 +91,9 @@ func TestReplaceVariables(t *testing.T) {
 
 	for name, tc := range testMatrix {
 		t.Run(name, func(t *testing.T) {
+			r := createTestRequestContext()
+			t.Setenv("testenv", "envvalue")
+
 			res, err := r.ReplaceVariables(tc.inputData)
 			if tc.expectError {
 				assert.Error(t, err)

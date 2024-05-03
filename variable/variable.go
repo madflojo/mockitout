@@ -1,7 +1,10 @@
 package variable
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -14,10 +17,13 @@ var (
 	ErrRandomVariable        = errors.New("error random variable not found")
 	ErrEnvironmentVariable   = errors.New("environment variable not found")
 	ErrVariableNotFound      = errors.New("variable not found")
+	ErrNoBody                = errors.New("no body found")
+	ErrInvalidJsonBody       = errors.New("unable to parse json body")
+	ErrInvalidJsonVar        = errors.New("unable to find json variable")
 )
 
 const (
-	VariableRegexp = `\{\{.+\}\}` // TODO: Add regex for variable
+	VariableRegexp = `\{\{[\w\-\s._]+\}\}` // TODO: Add regex for variable
 	RandomPrefix   = "$"
 	HeaderPrefix   = "header."
 	QueryPrefix    = "query."
@@ -70,6 +76,15 @@ func (r *RequestContext) ParseVariable(variable string) (string, error) {
 		return getEnvironmentVariable(cutVariable)
 	}
 
+	cutVariable, ok = strings.CutPrefix(variable, BodyPrefix)
+	if ok {
+		return r.getBodyJsonVariable(cutVariable)
+	}
+
+	if strings.Compare(variable, "body") == 0 {
+		return r.getTextBody(variable)
+	}
+
 	return "", ErrVariableNotFound
 }
 
@@ -112,4 +127,62 @@ func getEnvironmentVariable(variable string) (string, error) {
 		return "", ErrEnvironmentVariable
 	}
 	return val, nil
+}
+
+func (r *RequestContext) getTextBody(variable string) (string, error) {
+	if r.Request.Body == nil || r.Request.ContentLength < 1 {
+		return "", ErrNoBody
+	}
+
+	reader := io.Reader(r.Request.Body)
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
+func (r *RequestContext) getBodyJsonVariable(variable string) (string, error) {
+	if r.Request.Body == nil || r.Request.ContentLength < 1 {
+		return "", ErrNoBody
+	}
+
+	jsonPath := strings.Split(variable, ".")
+	if len(jsonPath) == 0 {
+		return "", ErrInvalidJsonVar
+	}
+
+	var data interface{}
+	err := json.NewDecoder(r.Request.Body).Decode(&data)
+	if err != nil {
+		return "", ErrInvalidJsonBody
+	}
+
+	for _, path := range jsonPath {
+		dataMap, ok := data.(map[string]interface{})
+		if !ok {
+			return "", ErrInvalidJsonBody
+		}
+
+		val, ok := dataMap[path]
+		if !ok {
+			return "", ErrInvalidJsonVar
+		}
+
+		data = val
+	}
+
+	// try return as string
+	if val, ok := data.(string); ok {
+		return val, nil
+	}
+
+	// try return as json (or default to string)
+	jsonValue, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Sprintf("%v", data), nil
+	} else {
+		return string(jsonValue), nil
+	}
 }

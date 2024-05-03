@@ -1,7 +1,9 @@
 package variable
 
 import (
+	"io"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
@@ -11,7 +13,12 @@ import (
 func createTestRequestContext() *RequestContext {
 	r := RequestContext{}
 
-	r.Request, _ = http.NewRequest("GET", "test:8080/url/:param?testquery=queryvalue", nil)
+	RandomMap["randomMock"] = func() string {
+		return "randomValue"
+	}
+
+	mockBody := strings.NewReader(`{"test": "body"}`)
+	r.Request, _ = http.NewRequest("GET", "test:8080/url/:param?testquery=queryvalue", mockBody)
 	r.Request.Header.Add("testheader", "headervalue")
 
 	r.Params = make(httprouter.Params, 0)
@@ -31,9 +38,6 @@ func TestNewRequestContext(t *testing.T) {
 }
 
 func TestParseVariable(t *testing.T) {
-	r := createTestRequestContext()
-	t.Setenv("testenv", "envvalue")
-
 	testMatrix := map[string]struct {
 		inputVariable string
 		expectError   bool
@@ -80,12 +84,27 @@ func TestParseVariable(t *testing.T) {
 			expectValue:   "",
 		},
 		"Valid Random": {
-			inputVariable: "$randomFirstName",
+			inputVariable: "$randomMock",
 			expectError:   false,
-			expectValue:   "",
+			expectValue:   "randomValue",
 		},
 		"Invalid Random": {
 			inputVariable: "$badRandom",
+			expectError:   true,
+			expectValue:   "",
+		},
+		"Valid Text Body": {
+			inputVariable: "body",
+			expectError:   false,
+			expectValue:   `{"test": "body"}`,
+		},
+		"Valid Json Body": {
+			inputVariable: "body.test",
+			expectError:   false,
+			expectValue:   "body",
+		},
+		"Invalid Json Body": {
+			inputVariable: "body.bad",
 			expectError:   true,
 			expectValue:   "",
 		},
@@ -103,14 +122,127 @@ func TestParseVariable(t *testing.T) {
 
 	for name, tc := range testMatrix {
 		t.Run(name, func(t *testing.T) {
+			r := createTestRequestContext()
+			t.Setenv("testenv", "envvalue")
+
 			value, err := r.ParseVariable(tc.inputVariable)
-			if len(tc.expectValue) > 0 {
-				assert.Equal(t, tc.expectValue, value)
-			}
+			assert.Equal(t, tc.expectValue, value)
 			if tc.expectError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestGetTestBody(t *testing.T) {
+	testMatrix := map[string]struct {
+		inputBody   string
+		expectError bool
+		expectValue string
+	}{
+		"Valid Body": {
+			inputBody:   "test body",
+			expectError: false,
+			expectValue: "test body",
+		},
+		"Valid Json Body": {
+			inputBody:   `{"test": "value"}`,
+			expectError: false,
+			expectValue: `{"test": "value"}`,
+		},
+		"Blank": {
+			inputBody:   "",
+			expectError: false,
+			expectValue: "",
+		},
+	}
+
+	for name, tc := range testMatrix {
+		t.Run(name, func(t *testing.T) {
+			r := createTestRequestContext()
+			r.Request.Body = io.NopCloser(strings.NewReader(tc.inputBody))
+
+			value, err := r.getTextBody("body")
+			if tc.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectValue, value)
+			}
+		})
+	}
+}
+
+func TestGetBodyJsonVariable(t *testing.T) {
+	testMatrix := map[string]struct {
+		inputBody     string
+		inputVariable string
+		expectError   bool
+		expectValue   string
+	}{
+		"Valid Json": {
+			inputBody:     `{"test": "value"}`,
+			inputVariable: "test",
+			expectError:   false,
+			expectValue:   "value",
+		},
+		"Valid Nested Json": {
+			inputBody:     `{"test": {"nested": "value2"}}`,
+			inputVariable: "test.nested",
+			expectError:   false,
+			expectValue:   "value2",
+		},
+		"Valid Json Map": {
+			inputBody:     `{"test": {"nested": {"key": "value"}}}`,
+			inputVariable: "test.nested",
+			expectError:   false,
+			expectValue:   `{"key":"value"}`,
+		},
+		"Valid Json Array": {
+			inputBody:     `{"test": {"nested": ["value1", "value2"]}}`,
+			inputVariable: "test.nested",
+			expectError:   false,
+			expectValue:   `["value1","value2"]`,
+		},
+		"Valid Json Int": {
+			inputBody:     `{"test": 1}`,
+			inputVariable: "test",
+			expectError:   false,
+			expectValue:   "1",
+		},
+		"Invalid Json": {
+			inputBody:     `{"test": "value"`,
+			inputVariable: "test",
+			expectError:   true,
+			expectValue:   "",
+		},
+		"Missing Json Variable": {
+			inputBody:     `{"test": "value"}`,
+			inputVariable: "bad",
+			expectError:   true,
+			expectValue:   "",
+		},
+		"Blank": {
+			inputBody:     "",
+			inputVariable: "test",
+			expectError:   true,
+			expectValue:   "",
+		},
+	}
+
+	for name, tc := range testMatrix {
+		t.Run(name, func(t *testing.T) {
+			r := createTestRequestContext()
+			r.Request.Body = io.NopCloser(strings.NewReader(tc.inputBody))
+
+			value, err := r.getBodyJsonVariable(tc.inputVariable)
+			if tc.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectValue, value)
 			}
 		})
 	}
