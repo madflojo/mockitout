@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	VariableRegexp = "{{}}" // TODO: Add regex for variable
+	VariableRegexp = `\{\{.+\}\}` // TODO: Add regex for variable
 	RandomPrefix   = "$"
 	HeaderPrefix   = "header."
 	QueryPrefix    = "query."

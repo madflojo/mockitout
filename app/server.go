@@ -2,11 +2,13 @@ package app
 
 import (
 	"fmt"
-	"github.com/julienschmidt/httprouter"
-	"github.com/madflojo/mockitout/mocks"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/madflojo/mockitout/mocks"
+	"github.com/madflojo/mockitout/variable"
+	"github.com/sirupsen/logrus"
 )
 
 // server is used as an interface for managing the HTTP server.
@@ -39,6 +41,8 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	ctx := variable.NewRequestContext(r, w, ps)
+
 	// Verify Return Code is set if not default to 200
 	if route.ReturnCode == 0 {
 		route.ReturnCode = 200
@@ -51,6 +55,11 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 
 	// Add any user defined headers
 	for k, v := range route.ResponseHeaders {
+		v, err := ctx.ReplaceVariables(v)
+		if err != nil {
+			log.Errorf("Error parsing variable %s - %s", v, err)
+			continue
+		}
 		w.Header().Set(k, v)
 	}
 
@@ -58,7 +67,11 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	w.WriteHeader(route.ReturnCode)
 
 	// Write Body to caller
-	fmt.Fprintf(w, "%s", route.Body)
+	varBody, err := ctx.ReplaceVariables(route.Body)
+	if err != nil {
+		log.Errorf("Error parsing variable %s - %s", route.Body, err)
+	}
+	fmt.Fprintf(w, "%s", varBody)
 }
 
 // middleware is used to intercept incoming HTTP calls and apply general functions upon
