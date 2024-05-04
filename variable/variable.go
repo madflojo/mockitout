@@ -23,7 +23,7 @@ var (
 )
 
 const (
-	VariableRegexp = `\{\{[\w\-\s._]+\}\}` // TODO: Add regex for variable
+	VariableRegexp = `\{\{[\w\-\s._$]+\}\}` // TODO: Add regex for variable
 	RandomPrefix   = "$"
 	HeaderPrefix   = "header."
 	QueryPrefix    = "query."

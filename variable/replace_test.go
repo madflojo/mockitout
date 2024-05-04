@@ -57,6 +57,11 @@ func TestReplaceVariables(t *testing.T) {
 			expectError: false,
 			expectValue: "Test Double Variable Data: headervalue queryvalue",
 		},
+		"Valid Random": {
+			inputData:   "Test Random Data: {{$randomMock}}",
+			expectError: false,
+			expectValue: "Test Random Data: randomValue",
+		},
 		"Invalid Random": {
 			inputData:   "Test Random Data: {{$badRandom}}",
 			expectError: false,

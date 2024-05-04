@@ -2,6 +2,8 @@ package variable
 
 import (
 	"fmt"
+	"os"
+	"runtime"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -10,7 +12,7 @@ import (
 type RandomFunc func() string
 
 var RandomMap = map[string]RandomFunc{
-	// comon
+	// common
 	"guid":         gofakeit.UUID,
 	"timestamp":    timeNowUnixString,
 	"isoTimestamp": timeNowIso,
@@ -42,8 +44,8 @@ var RandomMap = map[string]RandomFunc{
 	"randomStreetName":  gofakeit.Street,
 	"randomCountry":     gofakeit.Country,
 	"randomCountryCode": gofakeit.CountryAbr,
-	"randomLongitude":   randomLongitude,
-	"randomLatitude":    randomLatitude,
+	"randomLongitude":   randomWrapper(gofakeit.Longitude),
+	"randomLatitude":    randomWrapper(gofakeit.Latitude),
 	// images (TODO?)
 	// finance
 	"randomCreditCard":   randomCreditCard,
@@ -58,7 +60,39 @@ var RandomMap = map[string]RandomFunc{
 	"randomCatchPhrase":          gofakeit.Phrase,
 	"randomCatchPhraceAdjective": gofakeit.Adjective,
 	"randomCatchPhraseNoun":      gofakeit.Noun,
-	// databases
+	// domains, emails and usernames
+	"randomDomainName":   gofakeit.DomainName,
+	"randomDomainSuffix": gofakeit.DomainSuffix,
+	"randomEmail":        gofakeit.Email,
+	"randomUserName":     gofakeit.Username,
+	"randomUrl":          gofakeit.URL,
+	// files and directories
+	"randomFileExt": gofakeit.FileExtension,
+	// stores
+	"randomPrice":            randomPrice,
+	"randomProduct":          gofakeit.ProductName,
+	"randomProductMaterial":  gofakeit.ProductMaterial,
+	"randomProduectCategory": gofakeit.ProductCategory,
+	// grammar
+	"randomNoun":      gofakeit.Noun,
+	"randomVerb":      gofakeit.Verb,
+	"randomIngverb":   gofakeit.VerbAction,
+	"randomAdjective": gofakeit.Adjective,
+	"randomWord":      gofakeit.Word,
+	"randomWords":     randomSentence,
+	"randomPhrase":    gofakeit.Phrase,
+	// lorem ipsum
+	"randomLoremWord":       gofakeit.LoremIpsumWord,
+	"randomLoremWords":      randomLoremWords,
+	"randomLoremSentence":   randomLoremSentence,
+	"randomLoremSentences":  randomLoremSentences,
+	"randomLoremParagraph":  randomLoremParagraph,
+	"randomLoremParagraphs": randomLoremParagraphs,
+
+	// server specific
+	"hostname": getHostname,
+	"goos":     getGoos,
+	"goarch":   getGoarch,
 }
 
 func randomWrapper[T any](randFunc func() T) RandomFunc {
@@ -83,16 +117,47 @@ func randomPassword() string {
 	return gofakeit.Password(true, true, true, true, false, 12)
 }
 
-func randomLongitude() string {
-	// TODO:
-	return ""
-}
-
-func randomLatitude() string {
-	// TODO:
-	return ""
-}
-
 func randomCreditCard() string {
 	return gofakeit.CreditCard().Number
+}
+
+func getHostname() string {
+	hostname, _ := os.Hostname()
+	return hostname
+}
+
+func getGoos() string {
+	return runtime.GOOS
+}
+
+func getGoarch() string {
+	return runtime.GOARCH
+}
+
+func randomPrice() string {
+	return fmt.Sprintf("%f", gofakeit.Price(0, 1000))
+}
+
+func randomSentence() string {
+	return gofakeit.Sentence(20)
+}
+
+func randomLoremWords() string {
+	return gofakeit.LoremIpsumSentence(20)
+}
+
+func randomLoremSentence() string {
+	return gofakeit.LoremIpsumSentence(1)
+}
+
+func randomLoremSentences() string {
+	return gofakeit.LoremIpsumSentence(5)
+}
+
+func randomLoremParagraph() string {
+	return gofakeit.LoremIpsumParagraph(1, 5, 12, "")
+}
+
+func randomLoremParagraphs() string {
+	return gofakeit.LoremIpsumParagraph(3, 5, 12, "\n")
 }
