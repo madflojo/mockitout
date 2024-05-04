@@ -32,3 +32,12 @@ func TestGetRandomVariable(t *testing.T) {
 		})
 	}
 }
+
+func TestRandomMap(t *testing.T) {
+	for name, tc := range RandomMap {
+		t.Run(name, func(t *testing.T) {
+			val := tc()
+			assert.NotEmpty(t, val)
+		})
+	}
+}
