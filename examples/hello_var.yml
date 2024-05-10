@@ -1,0 +1,108 @@
+routes:
+  settings:
+    path: "/settings"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+      "hostname": "{{ $hostname }}"
+      "goos": "{{ $goos }}"
+      "goarch": "{{ $goarch }}"
+    body: |
+      {
+        "debug": "{{ environment.DEBUG }}",
+        "disable_logging": "{{ environment.DISABLE_LOGGING }}",
+        "enable_tls": "{{ environment.ENABLE_TLS }}",
+        "listen_addr": "{{ environment.LISTEN_ADDR }}",
+        "cert_file": "{{ environment.CERT_FILE }}",
+        "key_file": "{{ environment.KEY_FILE }}",
+        "gen_certs": "{{ environment.GEN_CERTS }}",
+        "mocks_file": "{{ environment.MOCKS_FILE }}"
+      }
+
+  page:
+    path: "/page"
+    response_headers:
+      "content-type": "text/html"
+      "server": "MockItOut"
+    body: |
+      <html>
+        <head>
+          <title>Lorem Ipsum</title>
+        </head>
+        <body>
+          <h1>Lorem Ipsum</h1>
+          <p>{{ $randomLoremParagraphs }}</p>
+        </body>
+      </html>
+
+  header_echo:
+    path: "/echo/header"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {
+        "headers": {
+          "accept": "{{ header.accept }}",
+          "user-agent": "{{ header.user-agent }}"
+        }
+      }
+
+  query_echo:
+    path: "/echo/query"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {
+        "query": "{{ query.test }}"
+      }
+
+  param_echo:
+    path: "/echo/param/:id"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {
+        "params": "{{ param.id }}"
+      }
+
+  body_echo:
+    path: "/echo/body"
+    response_headers:
+      "content-type": "text/html"
+      "server": "MockItOut"
+    body: |
+      Body: {{ body }}
+
+  json_echo:
+    path: "/echo/json"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {
+        "json": "{{ body.nested.test }}"
+      }
+
+  test_user:
+    path: "/test/user"
+    response_headers:
+      "content-type": "application/json"
+      "server": "MockItOut"
+    body: |
+      {
+        "user_id": "{{ $guid }}",
+        "username": "{{ $randomUserName }}",
+        "firstname": "{{ $randomFirstName }}",
+        "lastname": "{{ $randomLastName }}",
+        "email": "{{ $randomEmail }}",
+        "phone": "{{ $randomPhoneNumber }}",
+        "address": {
+          "street": "{{ $randomStreetName }}",
+          "city": "{{ $randomCity }}",
+          "country": "{{ $randomCountry }}"
+        },
+        "created_at": "{{ $timestamp }}"
+      }
