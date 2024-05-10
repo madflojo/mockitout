@@ -40,7 +40,7 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	ctx := variable.NewRequestContext(r, w, ps)
+	ctx := variable.NewVariableInstance(r, w, ps)
 
 	// Verify Return Code is set if not default to 200
 	if route.ReturnCode == 0 {

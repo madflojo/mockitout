@@ -62,6 +62,11 @@ func TestReplaceVariables(t *testing.T) {
 			expectError: false,
 			expectValue: "Test Random Data: randomValue",
 		},
+		"Valid Many Spaces": {
+			inputData:   "Test Random Data: {{                 $randomMock      }} {{  $randomMock       }}",
+			expectError: false,
+			expectValue: "Test Random Data: randomValue randomValue",
+		},
 		"Invalid Random": {
 			inputData:   "Test Random Data: {{$badRandom}}",
 			expectError: false,

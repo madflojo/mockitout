@@ -6,13 +6,15 @@ import (
 	"strings"
 )
 
+// varRegex holds the compiled regular expression for matching variables
 var varRegex *regexp.Regexp
 
 func init() {
 	varRegex = regexp.MustCompile(VariableRegexp)
 }
 
-func (r *RequestContext) ReplaceVariables(data string) (string, error) {
+// ReplaceVariables replaces all variables with the pattern {{ variable }} in the data string with their corresponding values
+func (r *variableInstance) ReplaceVariables(data string) (string, error) {
 	varInstances := varRegex.FindAllString(data, -1)
 
 	for _, v := range varInstances {

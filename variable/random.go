@@ -9,8 +9,10 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 )
 
+// RandomFunc is a function type that returns a random string on call
 type RandomFunc func() string
 
+// RandomMap is a map of the random variables and the RandomFuncs that generate them
 var RandomMap = map[string]RandomFunc{
 	// common
 	"guid":         gofakeit.UUID,
@@ -18,7 +20,7 @@ var RandomMap = map[string]RandomFunc{
 	"isoTimestamp": timeNowIso,
 	// text, numbers and colors
 	"randomAlphaNumberic": gofakeit.Letter,
-	"randomBoolean":       randomWrapper(gofakeit.Bool),
+	"randomBoolean":       RandomWrapper(gofakeit.Bool),
 	"randomInt":           randomInt,
 	"randomColor":         gofakeit.Color,
 	"randomHexColor":      gofakeit.HexColor,
@@ -44,9 +46,8 @@ var RandomMap = map[string]RandomFunc{
 	"randomStreetName":  gofakeit.Street,
 	"randomCountry":     gofakeit.Country,
 	"randomCountryCode": gofakeit.CountryAbr,
-	"randomLongitude":   randomWrapper(gofakeit.Longitude),
-	"randomLatitude":    randomWrapper(gofakeit.Latitude),
-	// images (TODO?)
+	"randomLongitude":   RandomWrapper(gofakeit.Longitude),
+	"randomLatitude":    RandomWrapper(gofakeit.Latitude),
 	// finance
 	"randomCreditCard":   randomCreditCard,
 	"randomCurrencyCode": gofakeit.CurrencyShort,
@@ -88,18 +89,20 @@ var RandomMap = map[string]RandomFunc{
 	"randomLoremSentences":  randomLoremSentences,
 	"randomLoremParagraph":  randomLoremParagraph,
 	"randomLoremParagraphs": randomLoremParagraphs,
-
 	// server specific
 	"hostname": getHostname,
 	"goos":     getGoos,
 	"goarch":   getGoarch,
 }
 
-func randomWrapper[T any](randFunc func() T) RandomFunc {
+// RandomWrapper converts a function that returns any value to a RandomFunc type
+func RandomWrapper[T any](randFunc func() T) RandomFunc {
 	return func() string {
 		return fmt.Sprintf("%v", randFunc())
 	}
 }
+
+// the following functions are implementations of the RandomFunc type which aren't found in the gofakeit library
 
 func timeNowUnixString() string {
 	return fmt.Sprint(time.Now().Unix())

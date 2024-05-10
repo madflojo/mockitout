@@ -10,19 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestRequestContext() *RequestContext {
-	r := RequestContext{}
+func createTestRequestContext() *variableInstance {
+	r := variableInstance{}
 
 	RandomMap["randomMock"] = func() string {
 		return "randomValue"
 	}
 
-	mockBody := strings.NewReader(`{"test": "body"}`)
-	r.Request, _ = http.NewRequest("GET", "test:8080/url/:param?testquery=queryvalue", mockBody)
-	r.Request.Header.Add("testheader", "headervalue")
+	mockBody := strings.NewReader(`{"test": "body", "testint": 10}`)
+	r.r, _ = http.NewRequest("GET", "test:8080/url/:param?testquery=queryvalue", mockBody)
+	r.r.Header.Add("testheader", "headervalue")
 
-	r.Params = make(httprouter.Params, 0)
-	r.Params = append(r.Params, httprouter.Param{Key: "testparam", Value: "paramvalue"})
+	r.p = make(httprouter.Params, 0)
+	r.p = append(r.p, httprouter.Param{Key: "testparam", Value: "paramvalue"})
 
 	return &r
 }
@@ -32,7 +32,7 @@ func TestNewRequestContext(t *testing.T) {
 	testRequest := &http.Request{}
 	testParams := httprouter.Params{}
 
-	r := NewRequestContext(testRequest, nil, testParams)
+	r := NewVariableInstance(testRequest, nil, testParams)
 
 	assert.NotNil(t, r)
 }
@@ -96,12 +96,17 @@ func TestParseVariable(t *testing.T) {
 		"Valid Text Body": {
 			inputVariable: "body",
 			expectError:   false,
-			expectValue:   `{"test": "body"}`,
+			expectValue:   `{"test": "body", "testint": 10}`,
 		},
 		"Valid Json Body": {
 			inputVariable: "body.test",
 			expectError:   false,
 			expectValue:   "body",
+		},
+		"Valid Json Int": {
+			inputVariable: "body.testint",
+			expectError:   false,
+			expectValue:   "10",
 		},
 		"Invalid Json Body": {
 			inputVariable: "body.bad",
@@ -162,7 +167,7 @@ func TestGetTestBody(t *testing.T) {
 	for name, tc := range testMatrix {
 		t.Run(name, func(t *testing.T) {
 			r := createTestRequestContext()
-			r.Request.Body = io.NopCloser(strings.NewReader(tc.inputBody))
+			r.r.Body = io.NopCloser(strings.NewReader(tc.inputBody))
 
 			value, err := r.getTextBody("body")
 			if tc.expectError {
@@ -235,7 +240,7 @@ func TestGetBodyJsonVariable(t *testing.T) {
 	for name, tc := range testMatrix {
 		t.Run(name, func(t *testing.T) {
 			r := createTestRequestContext()
-			r.Request.Body = io.NopCloser(strings.NewReader(tc.inputBody))
+			r.r.Body = io.NopCloser(strings.NewReader(tc.inputBody))
 
 			value, err := r.getBodyJsonVariable(tc.inputVariable)
 			if tc.expectError {
