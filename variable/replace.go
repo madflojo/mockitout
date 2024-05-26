@@ -25,7 +25,8 @@ func (r *variableInstance) ReplaceVariables(data string) (string, error) {
 		replacement, err := r.ParseVariable(removeBraces(v))
 		if err != nil {
 			log.Printf("Error parsing variable %s: %s", v, err)
-			continue
+			// on error replace variable instance with blank string
+			replacement = ""
 		}
 		data = strings.Replace(data, v, replacement, 1)
 	}
