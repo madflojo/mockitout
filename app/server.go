@@ -56,7 +56,9 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	for k, v := range route.ResponseHeaders {
 		v, err := ctx.ReplaceVariables(v)
 		if err != nil {
-			log.Errorf("Error parsing variable %s - %s", v, err)
+			log.WithFields(logrus.Fields{
+				"path": route.Path,
+			}).Errorf("Error parsing header variable %s - %s", v, err)
 			continue
 		}
 		w.Header().Set(k, v)
@@ -68,7 +70,9 @@ func (s *server) MockHandler(w http.ResponseWriter, r *http.Request, ps httprout
 	// Write Body to caller
 	varBody, err := ctx.ReplaceVariables(route.Body)
 	if err != nil {
-		log.Errorf("Error parsing variable %s - %s", route.Body, err)
+		log.WithFields(logrus.Fields{
+			"path": route.Path,
+		}).Errorf("Error parsing body variable %s - %s", route.Body, err)
 	}
 	fmt.Fprintf(w, "%s", varBody)
 }

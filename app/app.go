@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/madflojo/mockitout/config"
 	"github.com/madflojo/mockitout/mocks"
+	"github.com/madflojo/mockitout/variable"
 	"github.com/madflojo/testcerts"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -49,6 +50,7 @@ func Run(c config.Config) error {
 	if cfg.DisableLogging {
 		log.Level = logrus.FatalLevel
 	}
+	variable.InitLogger(log)
 
 	// Setup the HTTP Server
 	srv = &server{

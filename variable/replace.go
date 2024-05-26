@@ -1,16 +1,20 @@
 package variable
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 )
 
 // varRegex holds the compiled regular expression for matching variables
-var varRegex *regexp.Regexp
+var varRegex = regexp.MustCompile(VariableRegexp)
 
-func init() {
-	varRegex = regexp.MustCompile(VariableRegexp)
+// log is used within the variable package for logging.
+var log *logrus.Logger
+
+// InitLogger takes in a logrus.Logger instance and initialises the log variable
+func InitLogger(logger *logrus.Logger) {
+	log = logger
 }
 
 // ReplaceVariables replaces all variables with the pattern {{ variable }} in the data string with their corresponding values
