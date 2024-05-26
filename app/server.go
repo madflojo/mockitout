@@ -90,14 +90,6 @@ func (s *server) middleware(n httprouter.Handle) httprouter.Handle {
 			"content-length": r.ContentLength,
 		}).Debugf("HTTP Request to %s", r.URL)
 
-		// if r.ContentLength > 0 {
-		// 	// Dump payload into logs for visibility
-		// 	b, err := ioutil.ReadAll(r.Body)
-		// 	if err == nil {
-		// 		log.Debugf("Dumping Payload for request to %s: %s", r.URL, b)
-		// 	}
-		// }
-
 		// Call registered handler
 		n(w, r, ps)
 	}
