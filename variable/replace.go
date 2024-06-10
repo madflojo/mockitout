@@ -1,6 +1,7 @@
 package variable
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -26,21 +27,12 @@ func (r *variableInstance) ReplaceVariables(data string) (string, error) {
 		data = strings.Replace(data, v, replacement, 1)
 	}
 
-	return data, combineErrors(errs)
+	if len(errs) > 0 {
+		return data, errors.Join(errs...)
+	}
+	return data, nil
 }
 
 func removeBraces(data string) string {
 	return strings.Trim(data, "{} ")
-}
-
-func combineErrors(errs []error) error {
-	if len(errs) == 0 {
-		return nil
-	}
-
-	fmtErr := errs[0]
-	for i := 1; i < len(errs); i++ {
-		fmtErr = fmt.Errorf("%w, %w", fmtErr, errs[i])
-	}
-	return fmtErr
 }
