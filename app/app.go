@@ -7,13 +7,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/madflojo/mockitout/config"
 	"github.com/madflojo/mockitout/mocks"
 	"github.com/madflojo/testcerts"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"os"
 )
 
 // Common errors returned by this app.
